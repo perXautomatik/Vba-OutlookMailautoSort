@@ -34,8 +34,8 @@ Sub SaveMailAs()
     'Create objects.
     Dim objRegExp As RegExp
     Dim objMatch As Match
-    Dim DiarieSet   As String
-    Dim FastighetSet   As String
+    Dim DiarieSet   As MatchCollection
+    Dim FastighetSet   As MatchCollection
     Dim RetStr As String
     
     Set ns = GetNamespace("MAPI")
@@ -66,41 +66,43 @@ Sub SaveMailAs()
             .Pattern = "\<.*?\>"
             .Global = True
             NoLineBreaksNoHtml = .Replace(Replace(Replace(Replace(Replace(objItem.HTMLBody & "~" & objItem.Subject, Chr(10), ""), vbCrLf, " "), vbLf, " "), vbCr, " "), "")
-            Debug.Print (NoLineBreaksNoHtml)
         End With
         
-        If (Not (myRegex("" & NoLineBreaksNoHtml, "^[^-]*([MHNmhnbBVvMBNV]{1,4}[-]\d{4}[-]\d{1,4}\s)") = "Not matched")) Then
-            Set DiarieSet = myRegex("" & NoLineBreaksNoHtml, "^[^-]*([MHNmhnbBVvMBNV]{1,4}[-]\d{4}[-]\d{1,4}\s)")
+            Set objRegExp = New RegExp
+            objRegExp.IgnoreCase = True
+            objRegExp.Global = True
+        
+           objRegExp.Pattern = "[MHNmhnbBVv]{1,4}[-]\d{4}[-]\d{1,4}\s"
+           If (objRegExp.Test(NoLineBreaksNoHtml) = True) Then
+                     Set DiarieSet = objRegExp.Execute(NoLineBreaksNoHtml)
         End If
     
-        If (Not (myRegex("" & NoLineBreaksNoHtml, "[, ]{2}([^\d]*\d{1,2}[:]\d{1,2})\s?$") = "Not matched")) Then
-             Set FastighetSet = myRegex("" & NoLineBreaksNoHtml, "[, ]{2}([^\d]*\d{1,2}[:]\d{1,2})\s?$")
+            objRegExp.Pattern = "[^\s\d]{0,}\s?[^\s\d]{1,}\s[sS\d]{1,4}[:]\d{1,4}\s"
+           If (objRegExp.Test(NoLineBreaksNoHtml) = True) Then
+                 Set FastighetSet = objRegExp.Execute(NoLineBreaksNoHtml)
         End If
         
-        'Call unique(DiarieSet, Udiarie)
-        'Call unique(FastighetSet, UFastighet)
+        Call unique(DiarieSet, Udiarie)
+        Call unique(FastighetSet, UFastighet)
                 
     Dim var1 As Variant
     Dim var2 As Variant
     Dim var3 As Variant
     
     var1 = objItem.entryId
-    Debug.Print (Udiarie.Count & var1)
-    Debug.Print (UFastighet.Count)
     
     If (IsArrayEmpty(Udiarie) >= 1) Then
         var2 = Udiarie(1)
-        Debug.Print (var2)
-        Debug.Print ("var2")
-        
     End If
     
     If (IsArrayEmpty(UFastighet) >= 1) Then
         var3 = UFastighet(1)
-        Debug.Print (var3)
-        Debug.Print ("var3")
     End If
-
+    
+    Debug.Print (var2)
+        Debug.Print ("var2")
+    Debug.Print (var3)
+        Debug.Print ("var3")
     objFile.writeline (var1 & "~" & var2 & "~" & var3)
 
         Set Udiarie = Nothing
@@ -209,12 +211,17 @@ Function myRegex(MyString As String, MyPattern As String) As String
 End Function
 
 Sub unique(duped As MatchCollection, unduped As Collection)
+    
+    
+    Debug.Print (MatchCollection.lenght)
+        Debug.Print ("lenght")
+    
+    
+    Dim a As Variant
 
-Dim a As Variant
-
-  On Error Resume Next
-  For Each a In duped
-     unduped.Add a.Value, a.Value
+    On Error Resume Next
+    For Each a In duped
+         unduped.Add a.Value, a.Value
   Next
 
 End Sub
