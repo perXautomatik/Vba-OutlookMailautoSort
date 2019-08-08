@@ -1,15 +1,18 @@
 Attribute VB_Name = "MainModule"
+Option Explicit
+
 #If VBA7 Then
     Public Declare PtrSafe Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As LongPtr) 'For 64 Bit Systems
 #Else
     Public Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long) 'For 32 Bit Systems
 #End If
 
-Sub main()
+Public Sub main()
 
     Dim filename As String: filename = SaveAllMailsAsTxt.SaveMailAs
     
     Do
+        Dim fso As Variant
         If fso.FileExists(filename) Then
             Exit Do
         End If
@@ -28,5 +31,8 @@ Sub main()
     Call Shell("POWERSHELL.exe -noexit " & _
               """H:\Operations\REPORTS\Reports2018\Balance Sheet\SLmarginJE.ps1""", 1)
 End Sub
+
+
+
 
 
