@@ -82,8 +82,15 @@ Sub SaveMailAs()
                  Set FastighetSet = objRegExp.Execute(NoLineBreaksNoHtml)
         End If
         
-        Call unique(DiarieSet, Udiarie)
-        Call unique(FastighetSet, UFastighet)
+        Const setStorlek = DiarieSet.Count
+         Dim DiarieArray(setStorlek - 1) As Match
+        Call DiarieSet.CopyTo(DiarieArray, 0)
+        Const setStorlek2 = FastighetSet.Count
+        Dim FastighetArray(setStorlek2 - 1) As Match
+        Call FastighetSet.CopyTo(FastighetArray, 0)
+        
+        Call unique(DiarieArray, Udiarie)
+        Call unique(FastighetArray, UFastighet)
                 
     Dim var1 As Variant
     Dim var2 As Variant
