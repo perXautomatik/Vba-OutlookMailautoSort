@@ -7,10 +7,14 @@ Option Explicit
 '* adapted further by Christoffer Brobäck
 '***********************************************************************
 
-Sub GetAttachments()
+Public Sub GetAttachments()
 On Error Resume Next
 'create the folder if it doesnt exists:
-    Dim fso, ttxtfile, txtfile, WheretosaveFolder
+    Dim fso As Variant
+Dim ttxtfile As Variant
+Dim txtfile As Variant
+Dim WheretosaveFolder As Variant
+
     Dim objFolders As Object
     Set objFolders = CreateObject("WScript.Shell").SpecialFolders
  
@@ -32,7 +36,7 @@ On Error GoTo GetAttachments_err
     Dim Item As Object
     Dim Atmt As Attachment
     Dim FileName As String
-    Dim i As Integer
+    Dim i As Long
     Set ns = GetNamespace("MAPI")
     'Set Inbox = ns.GetDefaultFolder(olFolderInbox)
     ' added the option to select whic folder to export
@@ -99,6 +103,10 @@ GetAttachments_err:
         , vbCritical, "Error!"
     Resume GetAttachments_exit
 End Sub
+
+
+
+
 
 
 
