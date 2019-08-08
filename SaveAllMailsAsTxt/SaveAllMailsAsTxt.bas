@@ -60,54 +60,56 @@ Sub SaveMailAs()
     FileName = WheretosaveFolder & ".txt"
     Set objFile = objFSO.CreateTextFile(FileName, True)
 
-
     For Each objItem In Inbox.Items
            
         With CreateObject("vbscript.regexp")
             .Pattern = "\<.*?\>"
             .Global = True
             NoLineBreaksNoHtml = .Replace(Replace(Replace(Replace(Replace(objItem.HTMLBody & "~" & objItem.Subject, Chr(10), ""), vbCrLf, " "), vbLf, " "), vbCr, " "), "")
+            Debug.Print (NoLineBreaksNoHtml)
         End With
         
         Set objRegExp = New RegExp
         objRegExp.IgnoreCase = True
         objRegExp.Global = True
     
-       objRegExp.Pattern = "[MHNmhnbBVv]{1,4}[-]\d{4}[-]\d{1,4}\s"
+        objRegExp.Pattern = "^[^-]*([MHNmhnbBVvMBNV]{1,4}[-]\d{4}[-]\d{1,4}\s)"
        
-       If (objRegExp.Test(NoLineBreaksNoHtml) = True) Then
-                 Set DiarieSet = objRegExp.Execute(NoLineBreaksNoHtml)
+        If (objRegExp.Test(NoLineBreaksNoHtml) = True) Then
+            Set DiarieSet = objRegExp.Execute(NoLineBreaksNoHtml)
         End If
     
-        objRegExp.Pattern = "[^\s\d]{0,}\s?[^\s\d]{1,}\s[sS\d]{1,4}[:]\d{1,4}\s"
-       If (objRegExp.Test(NoLineBreaksNoHtml) = True) Then
+        objRegExp.Pattern = "[, ]{2}([^\d]*\d{1,2}[:]\d{1,2})\s?$"
+        If (objRegExp.Test(NoLineBreaksNoHtml) = True) Then
              Set FastighetSet = objRegExp.Execute(NoLineBreaksNoHtml)
         End If
         
-      '  Call unique(DiarieSet, Udiarie)
-       ' Call unique(FastighetSet, UFastighet)
+        'Call unique(DiarieSet, Udiarie)
+        'Call unique(FastighetSet, UFastighet)
                 
     Dim var1 As Variant
     Dim var2 As Variant
     Dim var3 As Variant
     
     var1 = objItem.entryId
-    Debug.Print (var1)
+    Debug.Print (Udiarie.Count & var1)
+    Debug.Print (UFastighet.Count)
     
     If (IsArrayEmpty(Udiarie) >= 1) Then
         var2 = Udiarie(1)
         Debug.Print (var2)
+        Debug.Print ("var2")
+        
     End If
     
     If (IsArrayEmpty(UFastighet) >= 1) Then
         var3 = UFastighet(1)
         Debug.Print (var3)
+        Debug.Print ("var3")
     End If
 
     objFile.writeline (var1 & "~" & var2 & "~" & var3)
 
-'path = windows temp & todaysDate()
-    
         Set Udiarie = Nothing
         Set UFastighet = Nothing
         Set DiarieSet = Nothing
