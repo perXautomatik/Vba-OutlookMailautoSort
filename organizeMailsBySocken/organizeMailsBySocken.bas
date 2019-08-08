@@ -13,19 +13,19 @@ Public Sub Move_Items()
    
     Open "C:\Users\crbk01\Desktop\ToExport.csv" For Input As #2
     
-    On Error Resume Next
+    On Error GoTo ErrorHandler
         While Not EOF(2)
             Line Input #2, dataline
             
             Dim LineItems() As String
-            Dim värde As Integer
+            Dim värde As Long
             Dim entryId As String
             LineItems = Split(dataline, ",")
             Dim SubFolder As Outlook.MAPIFolder
             
             If (UBound(LineItems) = 1) Then
-                värde = Replace(LineItems(1), Chr(34), "")
-                entryId = Replace(LineItems(0), Chr(34), "")
+                värde = Replace(LineItems(1), Chr$(34), vbNullString)
+                entryId = Replace(LineItems(0), Chr$(34), vbNullString)
                 
                 Set Item = olNs.GetItemFromID(entryId, Inbox.StoreID)
                 Item.UnRead = False
@@ -59,7 +59,7 @@ Public Sub Move_Items()
             End If
         Wend
         
-MsgErr_Exit:
+
     Set Inbox = Nothing
     Set SubFolder = Nothing
     Set olNs = Nothing
@@ -67,4 +67,11 @@ MsgErr_Exit:
     Close #2
 
     Exit Sub
+
+    Exit Sub
+ErrorHandler:
+    If Err.Number > 0 Then 'TODO: handle specific error
+        Err.Clear
+        Resume Next
+    End If
 End Sub
