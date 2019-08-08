@@ -68,33 +68,30 @@ Sub SaveMailAs()
             NoLineBreaksNoHtml = .Replace(Replace(Replace(Replace(Replace(objItem.HTMLBody & "~" & objItem.Subject, Chr(10), ""), vbCrLf, " "), vbLf, " "), vbCr, " "), "")
         End With
         
+        
+ Dim var1 As Variant
+    Dim var2 As Variant
+    Dim var3 As Variant
+           
             Set objRegExp = New RegExp
             objRegExp.IgnoreCase = True
             objRegExp.Global = True
         DiarieSet = Array()
         If (RxMatch(NoLineBreaksNoHtml, "[MHNmhnbBVv]{1,4}[-]\d{4}[-]\d{1,4}\s")) Then
-                Call unique(RxMatches(NoLineBreaksNoHtml, "[MHNmhnbBVv]{1,4}[-]\d{4}[-]\d{1,4}\s"), Udiarie)
+                
+                DiarieSet = RxMatches(NoLineBreaksNoHtml, "[MHNmhnbBVv]{1,4}[-]\d{4}[-]\d{1,4}\s")
+                var2 = DiarieSet(LBound(DiarieSet))
         End If
         
         FastighetSet = Array()
         
         If (RxMatch(NoLineBreaksNoHtml, "[^\s\d]{0,}\s?[^\s\d]{1,}\s[sS\d]{1,4}[:]\d{1,4}\s")) Then
-                 Call unique(RxMatches(NoLineBreaksNoHtml, "[^\s\d]{0,}\s?[^\s\d]{1,}\s[sS\d]{1,4}[:]\d{1,4}\s"), UFastighet)
+                    FastighetSet = RxMatches(NoLineBreaksNoHtml, "[^\s\d]{0,}\s?[^\s\d]{1,}\s[sS\d]{1,4}[:]\d{1,4}\s")
+                 var3 = FastighetSet(LBound(FastighetSet))
         End If
                 
-    Dim var1 As Variant
-    Dim var2 As Variant
-    Dim var3 As Variant
     
     var1 = objItem.entryId
-    
-    If (IsArrayEmpty(Udiarie) >= 1) Then
-        var2 = Udiarie(1)
-    End If
-    
-    If (IsArrayEmpty(UFastighet) >= 1) Then
-        var3 = UFastighet(1)
-    End If
     
     Debug.Print (var2)
         Debug.Print ("var2")
@@ -234,7 +231,7 @@ Debug.Print "before" & UBound(duped) - LBound(duped) + 1
          unduped.Add a.Value, a.Value
   Next
 
-Debug.Print "after" & UBound(unduped) - LBound(unduped) + 1
+Debug.Print "after" & UBound(unduped) - LBound(duped) + 1
 
 End Sub
 
