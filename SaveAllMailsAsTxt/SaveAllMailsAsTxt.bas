@@ -186,6 +186,34 @@ End Sub
     
     End Function
 
+Function Regex(MyString As String, MyPattern As String) As String
+    Dim Regex As New RegExp
+    Dim strPattern As String
+    Dim strInput As String
+    Dim strReplace As String
+    Dim strOutput As String
+
+
+    strPattern = "^[0-9]{1,3}"
+
+    If strPattern <> "" Then
+        strInput = Myrange.Value
+        strReplace = ""
+
+        With Regex
+            .Global = True
+            .MultiLine = True
+            .IgnoreCase = False
+            .Pattern = strPattern
+        End With
+
+        If Regex.Test(strInput) Then
+            simpleCellRegex = Regex.Replace(strInput, strReplace)
+        Else
+            simpleCellRegex = "Not matched"
+        End If
+    End If
+End Function
 
 Sub unique(duped As MatchCollection, unduped As Collection)
 
