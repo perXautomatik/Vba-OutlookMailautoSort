@@ -34,8 +34,8 @@ Sub SaveMailAs()
     'Create objects.
     Dim objRegExp As RegExp
     Dim objMatch As Match
-    Dim DiarieSet   As MatchCollection
-    Dim FastighetSet   As MatchCollection
+    Dim DiarieSet   As String
+    Dim FastighetSet   As String
     Dim RetStr As String
     
     Set ns = GetNamespace("MAPI")
@@ -69,19 +69,12 @@ Sub SaveMailAs()
             Debug.Print (NoLineBreaksNoHtml)
         End With
         
-        Set objRegExp = New RegExp
-        objRegExp.IgnoreCase = True
-        objRegExp.Global = True
-    
-        objRegExp.Pattern = "^[^-]*([MHNmhnbBVvMBNV]{1,4}[-]\d{4}[-]\d{1,4}\s)"
-       
-        If (objRegExp.Test(NoLineBreaksNoHtml) = True) Then
-            Set DiarieSet = objRegExp.Execute(NoLineBreaksNoHtml)
+        If (Not (myRegex("" & NoLineBreaksNoHtml, "^[^-]*([MHNmhnbBVvMBNV]{1,4}[-]\d{4}[-]\d{1,4}\s)") = "Not matched")) Then
+            Set DiarieSet = myRegex("" & NoLineBreaksNoHtml, "^[^-]*([MHNmhnbBVvMBNV]{1,4}[-]\d{4}[-]\d{1,4}\s)")
         End If
     
-        objRegExp.Pattern = "[, ]{2}([^\d]*\d{1,2}[:]\d{1,2})\s?$"
-        If (objRegExp.Test(NoLineBreaksNoHtml) = True) Then
-             Set FastighetSet = objRegExp.Execute(NoLineBreaksNoHtml)
+        If (Not (myRegex("" & NoLineBreaksNoHtml, "[, ]{2}([^\d]*\d{1,2}[:]\d{1,2})\s?$") = "Not matched")) Then
+             Set FastighetSet = myRegex("" & NoLineBreaksNoHtml, "[, ]{2}([^\d]*\d{1,2}[:]\d{1,2})\s?$")
         End If
         
         'Call unique(DiarieSet, Udiarie)
@@ -186,7 +179,7 @@ End Sub
     
     End Function
 
-Function Regex(MyString As String, MyPattern As String) As String
+Function myRegex(MyString As String, MyPattern As String) As String
     Dim Regex As New RegExp
     Dim strPattern As String
     Dim strInput As String
@@ -194,10 +187,10 @@ Function Regex(MyString As String, MyPattern As String) As String
     Dim strOutput As String
 
 
-    strPattern = "^[0-9]{1,3}"
+    strPattern = MyPattern
 
     If strPattern <> "" Then
-        strInput = Myrange.Value
+        strInput = MyString
         strReplace = ""
 
         With Regex
