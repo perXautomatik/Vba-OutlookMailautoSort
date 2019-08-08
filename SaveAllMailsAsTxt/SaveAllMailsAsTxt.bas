@@ -42,10 +42,11 @@ Sub SaveMailAs()
     Set Inbox = ns.PickFolder
     WheretosaveFolder = ttxtfile & "\" & Inbox
     
+    
     If Inbox Is Nothing Then
                 MsgBox "You need to select a folder in order to save the attachments", vbCritical, _
                "Export - Not Found"
-        Exit Sub
+        GoTo LastLine
     End If
 
     i = 0
@@ -53,43 +54,61 @@ Sub SaveMailAs()
     If Inbox.Items.Count = 0 Then
         MsgBox "There are no messages in the selected folder.", vbInformation, _
                "Export - Not Found"
-        Exit Sub
+        GoTo LastLine
     End If
 
     FileName = WheretosaveFolder & ".txt"
-    Set objFile = objFSO.CreateTextFile(FileName, False)
+    Set objFile = objFSO.CreateTextFile(FileName, True)
+
 
     For Each objItem In Inbox.Items
            
         With CreateObject("vbscript.regexp")
             .Pattern = "\<.*?\>"
             .Global = True
-               NoLineBreaksNoHtml = .Replace(Replace(Replace(Replace(Replace(objItem.HTMLBody & "~" & objItem.Subject, Chr(10), ""), vbCrLf, " "), vbLf, " "), vbCr, " "), "")
+            NoLineBreaksNoHtml = .Replace(Replace(Replace(Replace(Replace(objItem.HTMLBody & "~" & objItem.Subject, Chr(10), ""), vbCrLf, " "), vbLf, " "), vbCr, " "), "")
         End With
         
-            Set objRegExp = New RegExp
-            objRegExp.IgnoreCase = True
-            objRegExp.Global = True
+        Set objRegExp = New RegExp
+        objRegExp.IgnoreCase = True
+        objRegExp.Global = True
+    
+       objRegExp.Pattern = "[MHNmhnbBVv]{1,4}[-]\d{4}[-]\d{1,4}\s"
+       
+       If (objRegExp.Test(NoLineBreaksNoHtml) = True) Then
+                 Set DiarieSet = objRegExp.Execute(NoLineBreaksNoHtml)
+        End If
+    
+        objRegExp.Pattern = "[^\s\d]{0,}\s?[^\s\d]{1,}\s[sS\d]{1,4}[:]\d{1,4}\s"
+       If (objRegExp.Test(NoLineBreaksNoHtml) = True) Then
+             Set FastighetSet = objRegExp.Execute(NoLineBreaksNoHtml)
+        End If
         
-           objRegExp.Pattern = "[MHNmhnbBVv]{1,4}[-]\d{4}[-]\d{1,4}\s"
-           
-           If (objRegExp.Test(NoLineBreaksNoHtml) = True) Then
-                     Set DiarieSet = objRegExp.Execute(NoLineBreaksNoHtml)
-            End If
-        
-            objRegExp.Pattern = "[^\s\d]{0,}\s?[^\s\d]{1,}\s[sS\d]{1,4}[:]\d{1,4}\s"
-           If (objRegExp.Test(NoLineBreaksNoHtml) = True) Then
-                 Set FastighetSet = objRegExp.Execute(NoLineBreaksNoHtml)
-            End If
-        
-        Call unique(DiarieSet, Udiarie)
-        Call unique(FastighetSet, UFastighet)
+      '  Call unique(DiarieSet, Udiarie)
+       ' Call unique(FastighetSet, UFastighet)
                 
-        objFile.writeline (objItem.entryId & "~" & IIf(Udiarie.Count >= 1, Udiarie(1), "") & "~" & IIf(UFastighet.Count >= 1, UFastighet(1), ""))
+    Dim var1 As Variant
+    Dim var2 As Variant
+    Dim var3 As Variant
+    
+    var1 = objItem.entryId
+    Debug.Print (var1)
+    
+    If (IsArrayEmpty(Udiarie) >= 1) Then
+        var2 = Udiarie(1)
+        Debug.Print (var2)
+    End If
+    
+    If (IsArrayEmpty(UFastighet) >= 1) Then
+        var3 = UFastighet(1)
+        Debug.Print (var3)
+    End If
+
+    objFile.writeline (var1 & "~" & var2 & "~" & var3)
 
 'path = windows temp & todaysDate()
     
-       Set Udiarie = Nothing
+        Set Udiarie = Nothing
         Set UFastighet = Nothing
         Set DiarieSet = Nothing
         Set UFastighet = Nothing
@@ -97,13 +116,12 @@ Sub SaveMailAs()
         Set fso = Nothing
         
 
+LastLine:
 ' Clear memory
 SaveMailAs_exit:
     Set Atmt = Nothing
     Set objItem = Nothing
     Set ns = Nothing
-    
-    Exit Sub
 ' Handle errors
 'GetAttachments_err:
  '   MsgBox "An unexpected error has occurred." _
@@ -114,6 +132,58 @@ SaveMailAs_exit:
       '  , vbCritical, "Error!"
  '   Resume GetAttachments_exit
 End Sub
+
+        Public Function IsArrayEmpty(Arr As Variant) As Boolean
+    ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    ' IsArrayEmpty
+    ' This function tests whether the array is empty (unallocated). Returns TRUE or FALSE.
+    '
+    ' The VBA IsArray function indicates whether a variable is an array, but it does not
+    ' distinguish between allocated and unallocated arrays. It will return TRUE for both
+    ' allocated and unallocated arrays. This function tests whether the array has actually
+    ' been allocated.
+    '
+    ' This function is really the reverse of IsArrayAllocated.
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    
+    Dim LB As Long
+    Dim UB As Long
+    
+    Err.Clear
+    On Error Resume Next
+    If IsArray(Arr) = False Then
+        ' we weren't passed an array, return True
+        IsArrayEmpty = True
+    End If
+    
+    ' Attempt to get the UBound of the array. If the array is
+    ' unallocated, an error will occur.
+    UB = UBound(Arr, 1)
+    If (Err.Number <> 0) Then
+        IsArrayEmpty = True
+    Else
+        ''''''''''''''''''''''''''''''''''''''''''
+        ' On rare occassion, under circumstances I
+        ' cannot reliably replictate, Err.Number
+        ' will be 0 for an unallocated, empty array.
+        ' On these occassions, LBound is 0 and
+        ' UBoung is -1.
+        ' To accomodate the weird behavior, test to
+        ' see if LB > UB. If so, the array is not
+        ' allocated.
+        ''''''''''''''''''''''''''''''''''''''''''
+        Err.Clear
+        LB = LBound(Arr)
+        If LB > UB Then
+            IsArrayEmpty = True
+        Else
+            IsArrayEmpty = False
+        End If
+    End If
+    
+    
+    End Function
+
 
 Sub unique(duped As MatchCollection, unduped As Collection)
 
