@@ -34,8 +34,8 @@ Sub SaveMailAs()
     'Create objects.
     Dim objRegExp As RegExp
     Dim objMatch As Match
-    Dim DiarieSet   As MatchCollection
-    Dim FastighetSet   As MatchCollection
+    Dim DiarieSet
+    Dim FastighetSet
     Dim RetStr As String
     
     Set ns = GetNamespace("MAPI")
@@ -71,26 +71,16 @@ Sub SaveMailAs()
             Set objRegExp = New RegExp
             objRegExp.IgnoreCase = True
             objRegExp.Global = True
-        
-           objRegExp.Pattern = "[MHNmhnbBVv]{1,4}[-]\d{4}[-]\d{1,4}\s"
-           If (objRegExp.Test(NoLineBreaksNoHtml) = True) Then
-                     Set DiarieSet = objRegExp.Execute(NoLineBreaksNoHtml)
-        End If
-    
-            objRegExp.Pattern = "[^\s\d]{0,}\s?[^\s\d]{1,}\s[sS\d]{1,4}[:]\d{1,4}\s"
-           If (objRegExp.Test(NoLineBreaksNoHtml) = True) Then
-                 Set FastighetSet = objRegExp.Execute(NoLineBreaksNoHtml)
+        DiarieSet = Array()
+        If (RxMatch(NoLineBreaksNoHtml, "[MHNmhnbBVv]{1,4}[-]\d{4}[-]\d{1,4}\s")) Then
+                Call unique(RxMatches(NoLineBreaksNoHtml, "[MHNmhnbBVv]{1,4}[-]\d{4}[-]\d{1,4}\s"), Udiarie)
         End If
         
-        Const setStorlek = DiarieSet.Count
-         Dim DiarieArray(setStorlek - 1) As Match
-        Call DiarieSet.CopyTo(DiarieArray, 0)
-        Const setStorlek2 = FastighetSet.Count
-        Dim FastighetArray(setStorlek2 - 1) As Match
-        Call FastighetSet.CopyTo(FastighetArray, 0)
+        FastighetSet = Array()
         
-        Call unique(DiarieArray, Udiarie)
-        Call unique(FastighetArray, UFastighet)
+        If (RxMatch(NoLineBreaksNoHtml, "[^\s\d]{0,}\s?[^\s\d]{1,}\s[sS\d]{1,4}[:]\d{1,4}\s")) Then
+                 Call unique(RxMatches(NoLineBreaksNoHtml, "[^\s\d]{0,}\s?[^\s\d]{1,}\s[sS\d]{1,4}[:]\d{1,4}\s"), UFastighet)
+        End If
                 
     Dim var1 As Variant
     Dim var2 As Variant
@@ -137,7 +127,7 @@ SaveMailAs_exit:
  '   Resume GetAttachments_exit
 End Sub
 
-        Public Function IsArrayEmpty(Arr As Variant) As Boolean
+Public Function IsArrayEmpty(Arr As Variant) As Boolean
     ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
     ' IsArrayEmpty
     ' This function tests whether the array is empty (unallocated). Returns TRUE or FALSE.
@@ -188,41 +178,54 @@ End Sub
     
     End Function
 
-Function myRegex(MyString As String, MyPattern As String) As String
-    Dim Regex As New RegExp
-    Dim strPattern As String
-    Dim strInput As String
-    Dim strReplace As String
-    Dim strOutput As String
-
-
-    strPattern = MyPattern
-
-    If strPattern <> "" Then
-        strInput = MyString
-        strReplace = ""
-
-        With Regex
-            .Global = True
-            .MultiLine = True
-            .IgnoreCase = False
-            .Pattern = strPattern
-        End With
-
-        If Regex.Test(strInput) Then
-            simpleCellRegex = Regex.Replace(strInput, strReplace)
-        Else
-            simpleCellRegex = "Not matched"
-        End If
-    End If
+Public Function RxMatch( _
+    ByVal SourceString As String, _
+    ByVal Pattern As String, _
+    Optional ByVal IgnoreCase As Boolean = True, _
+    Optional ByVal MultiLine As Boolean = True) As Boolean
+ 
+    With New RegExp
+        .MultiLine = MultiLine
+        .IgnoreCase = IgnoreCase
+        .Global = False
+        .Pattern = Pattern
+        RxMatch = .Test(SourceString)
+    End With
+    
 End Function
 
-Sub unique(duped As MatchCollection, unduped As Collection)
+Public Function RxMatches( _
+    ByVal SourceString As String, _
+    ByVal Pattern As String, _
+    Optional ByVal IgnoreCase As Boolean = True, _
+    Optional ByVal MultiLine As Boolean = True, _
+    Optional ByVal MatchGlobal As Boolean = True) As Variant
+ 
+    Dim oMatch As Match
+    Dim arrMatches
+    Dim lngCount As Long
     
+    ' Initialize to an empty array
+    arrMatches = Array()
+    With New RegExp
+        .MultiLine = MultiLine
+        .IgnoreCase = IgnoreCase
+        .Global = MatchGlobal
+        .Pattern = Pattern
+        For Each oMatch In .Execute(SourceString)
+            ReDim Preserve arrMatches(lngCount)
+            arrMatches(lngCount) = oMatch.Value
+            lngCount = lngCount + 1
+        Next
+    End With
+ 
+    RxMatches = arrMatches
+End Function
+
+Sub unique(duped As Variant, unduped As Variant)
     
-    Debug.Print (MatchCollection.lenght)
-        Debug.Print ("lenght")
-    
+        
+Debug.Print "before" & UBound(duped) - LBound(duped) + 1
     
     Dim a As Variant
 
@@ -230,6 +233,8 @@ Sub unique(duped As MatchCollection, unduped As Collection)
     For Each a In duped
          unduped.Add a.Value, a.Value
   Next
+
+Debug.Print "after" & UBound(unduped) - LBound(unduped) + 1
 
 End Sub
 
