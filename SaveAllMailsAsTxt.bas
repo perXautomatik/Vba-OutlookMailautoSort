@@ -4,7 +4,7 @@ Option Explicit
 '***********************************************************************
 '* Code based on sample code from Martin Green and adapted to my needs
 '* more on TheTechieGuy.com - Liron@TheTechieGuy.com
-'* adapted further by Christoffer Brob‰ck
+'* adapted further by Christoffer Brob√§ck
 '***********************************************************************
 
 Public Sub SaveMailAs()
@@ -52,8 +52,8 @@ Public Sub SaveMailAs()
         
         Dim FastighetSet As Variant: FastighetSet = Array()
         Dim var3 As Variant
-        If (RxMatch(NoLineBreaksNoHtml, "[^\s\d]{0,}\s?[^\s\d]{1,}\s[sS\d]{1,4}[:]\d{1,4}\s")) Then
-            FastighetSet = RxMatches(NoLineBreaksNoHtml, "[^\s\d]{0,}\s?[^\s\d]{1,}\s[sS\d]{1,4}[:]\d{1,4}\s")
+        If (RxMatch(NoLineBreaksNoHtml, "[^\s\d]*\s?[^\s\d]*\s?[^\s\d]{1,}\s[\d]{1,4}[:]\d{1,4}\s?")) Then
+            FastighetSet = RxMatches(NoLineBreaksNoHtml, "[^\s\d]*\s?[^\s\d]*\s?[^\s\d]{1,}\s[\d]{1,4}[:]\d{1,4}\s?")
             var3 = FastighetSet(LBound(FastighetSet))
         End If
               
